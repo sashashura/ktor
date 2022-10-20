@@ -9,6 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.io.*
 import io.ktor.util.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
@@ -65,11 +66,10 @@ public fun HttpClient.defaultTransformers() {
             }
 
             Int::class -> {
-                proceedWith(HttpResponseContainer(info, body.readRemaining().readText().toInt()))
+                proceedWith(HttpResponseContainer(info, body.readRemaining().readString().toInt()))
             }
 
-            DROP_ByteReadPacket::class,
-            DROP_Input::class -> {
+            Packet::class -> {
                 proceedWith(HttpResponseContainer(info, body.readRemaining()))
             }
 
@@ -100,12 +100,9 @@ public fun HttpClient.defaultTransformers() {
                         throw cause
                     } finally {
                         response.complete()
-                    }
-                }.also { writerJob ->
-                    writerJob.invokeOnCompletion {
                         responseJobHolder.complete()
                     }
-                }.channel
+                }
 
                 proceedWith(HttpResponseContainer(info, channel))
             }

@@ -10,6 +10,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.io.*
 import io.ktor.util.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.charsets.*
@@ -144,9 +145,9 @@ public class HttpPlainText internal constructor(
         return TextContent(content, contentType.withCharset(charset))
     }
 
-    internal fun read(call: HttpClientCall, body: DROP_Input): String {
+    internal fun read(call: HttpClientCall, body: Packet): String {
         val actualCharset = call.response.charset() ?: responseCharsetFallback
-        return body.readText(charset = actualCharset)
+        return body.readString(charset = actualCharset)
     }
 
     internal fun addCharsetHeaders(context: HttpRequestBuilder) {
